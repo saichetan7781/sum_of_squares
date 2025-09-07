@@ -1,5 +1,20 @@
 # Lukas Assignment (Gleam)
 
+## Team Members
+
+- **Avighna Yarlagadda**  
+  - UFID: 40987768
+
+- **Manikanta Srinivas Penumarthi**  
+  - UFID: 95550186
+
+## Project Description
+
+The program leverages actors for concurrency:
+Boss: distributes work units to workers, gathers results, and finalizes output.
+Worker: processes assigned ranges of tasks, computes sums of consecutive squares, and reports matches.
+Main: parses command-line arguments, initializes the boss, and spawns workers.
+
 ## Overview
 This project solves the **Lukas problem**:
 
