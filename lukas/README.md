@@ -8,6 +8,9 @@
 - **Manikanta Srinivas Penumarthi**  
   - UFID: 95550186
 
+## Github Repository
+https://github.com/avighnayarlagadda/perfect_squares
+
 ## Project Description
 
 The program leverages actors for concurrency:
