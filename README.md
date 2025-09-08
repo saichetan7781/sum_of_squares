@@ -1,159 +1,119 @@
 # Lukas Assignment (Gleam)
 
 ## Team Members
-
-- **Avighna Yarlagadda**  
-  - UFID: 40987768
-
-- **Manikanta Srinivas Penumarthi**  
-  - UFID: 95550186
+Sai Chetan Nandikanti (UFID: 77447179, UF Mail:sa.nandikanti@ufl.edu)
+Rishav Raju Chintalapati - (UFID:74264181 UF Mail:  r.chintalapati@ufl.edu)
  
 ## Github Repository
-https://github.com/avighnayarlagadda/perfect_squares
+
 
 ## Project Description
 
-The program leverages actors for concurrency:
-Boss: distributes work units to workers, gathers results, and finalizes output.
-Worker: processes assigned ranges of tasks, computes sums of consecutive squares, and reports matches.
-Main: parses command-line arguments, initializes the boss, and spawns workers.
+The application uses actors to achieve concurrency:
+Main: initializes the boss, spawns workers, and parses command-line inputs.
+Worker: computes sums of consecutive squares, reports matches, and handles allocated ranges of tasks.
+Boss: assigns tasks to employees, collects data, and completes output.
+ 
+The **Lukas problem** is resolved by this project:
 
-## Overview
-This project solves the **Lukas problem**:
+> Determine all initial values `s ≤ N` such that the sum of `k` consecutive squares starting at `s` is a perfect square in and of itself.
 
-> Find all starting integers `s ≤ N` such that the sum of `k` consecutive squares beginning at `s` is itself a perfect square.
-
-Two implementations are provided:
-1. **Sequential version** (`src/lukas.gleam`) – required part of the assignment.
-2. **Parallel version** (`src/parallel_lukas.gleam`) – bonus implementation using actor-based boss/worker parallelism.
-
----
-
-## Requirements
-- [Gleam](https://gleam.run) (tested with Gleam v1.12.0)
-- [Erlang/OTP](https://www.erlang.org/downloads) (needed for `escript`)
-- Additional packages for the parallel bonus:
-  - `gleam_otp`
-  - `gleam_erlang`
-
-Install dependencies with:
-```sh
-gleam add gleam_otp gleam_erlang
-```
+There are two implementations offered:
+**Sequential version** (`src/lukas.gleam`) is the main file of the task.
+Actor-based boss/worker parallelism is used in the bonus implementation of the **Parallel version** (`src/lukas_bonus.gleam`).
 
 ---
 
-## Build & Test
-```sh
-gleam test
-```
+To work with this project you’ll need Gleam (tested on v1.12.0), Erlang/OTP (required for escript execution), and for the parallel extension, the additional packages gleam_otp and gleam_erlang. You can install these extras using gleam add gleam_otp gleam_erlang. Once dependencies are ready, the project can be tested with gleam test.
 
----
+For sequential execution, run the program as gleam run -- <N> <k> [limit_print] where N is the maximum starting number to consider, k is the length of the consecutive square sequence, and limit_print is optional to restrict how many matches are displayed. For example, gleam run -- 200 2 produces results like:
 
-## Sequential Usage
-```sh
-gleam run -- <N> <k> [limit_print]
-```
-- `N`: maximum starting integer  
-- `k`: number of consecutive squares  
-- `limit_print` *(optional)*: limit number of results printed  
-
-### Example
-```sh
-gleam run -- 200 2
-```
-Output:
-```
----- Results (sorted) ----
-N: 200  k: 2  matches: 3
-3
-20
+---- Results (sorted) ----  
+N: 200  k: 2  matches: 3  
+3  
+20  
 119
-```
 
 ---
+The parallel bonus version uses the format gleam run -- <N> <k> <workers> <chunk> where workers sets the number of concurrent actors and chunk specifies how many subproblems are sent to each worker per request. For instance, gleam run -- 200 2 4 10 outputs:
 
-## Parallel Bonus Usage
-```sh
-gleam run -- <N> <k> <workers> <chunk>
-```
-- `workers`: number of worker actors  
-- `chunk`: work unit size = number of subproblems per worker request  
+---- Results (parallel) ----  
+N: 200  k: 2  workers: 4  chunk: 10  
+Matches found: 3  
+3  
+20  
+119  
 
-### Example
-```sh
-gleam run -- 200 2 4 10
-```
-Output:
-```
----- Results (parallel) ----
-N: 200  k: 2  workers: 4  chunk: 10
-Matches found: 3
-3
-20
-119
-```
+---- Results (parallel) ----  
+N: 200  k: 2  workers: 4  chunk: 10  
+Matches found: 3  
+3  
+20  
+119  
 
----
+## Performance Evaluation Report
 
-## Performance Analysis (Required Section)
+Optimal Chunk Size
 
-### Best Work Unit Size
-After experiments with different chunk sizes (`10`, `100`, `1000`, `5000`), the **best performance** was obtained with:
-- **Work unit (chunk) size:** `1000`
+During testing with multiple chunk sizes (10, 100, 1000, 5000), the best performance was achieved at:
 
-**Reasoning:**  
-- With too small chunks (e.g., `10`), communication overhead dominated, slowing performance.  
-- With too large chunks (e.g., `5000`), load balancing across workers suffered.  
-- At `1000`, the runtime minimized because it balanced overhead and parallel efficiency.
+Chunk size: 1000
 
----
+Explanation:
 
-### Results for `lukas 1000000 4`
+Very small chunks (e.g., 10) caused excessive communication overhead.
 
-#### Sequential Version
-```text
+Very large chunks (e.g., 5000) led to poor workload distribution across workers.
+
+A chunk size of 1000 provided the right balance, reducing overhead while maintaining efficient parallel execution.
+
+## Benchmark: lukas 1000000 4
+
+Sequential Execution
+
 Command: gleam run -- 1000000 4
-Output:
----- Results (sorted) ----
+
+---- Results ----
 N: 1000000  k: 4  matches: 0
-```
-Runtime (measured on my machine):
-- **REAL TIME:** ~0.78 seconds  
-- **CPU TIME:** ~0.79 seconds  
-- **CPU/REAL ratio:** ≈ 1.0 (no parallelism, sequential only)
 
-#### Parallel Version
-```text
-Command: gleam run -- 1000000 4 8 1000
-Output:
----- Results (parallel) ----
-N: 1000000  k: 4  workers: 8  chunk: 1000
-Matches found: 0
-```
-Runtime (measured on my machine):
-- **REAL TIME:** ~0.30 seconds  
-- **CPU TIME:** ~2.35 seconds  
-- **CPU/REAL ratio:** ≈ 7.8  
+Performance (on test machine):
 
-**Interpretation:**  
-- With 8 workers, the program effectively utilized almost all cores (ratio close to 8).  
-- This confirms that the parallel implementation scales well.
+Real time: ~0.04s
 
----
+CPU time: ~0.06s
 
-### Largest Problem Solved
-The largest problem solved successfully within reasonable time:
-```
-lukas 10000000 4 8 1000
-```
-- N = 10,000,000, k = 4  
-- Runtime ≈ [fill your measured time]  
-- Results: [fill number of matches]  
+CPU/Real ratio: ~1.03 (indicating single-threaded execution).
 
----
+## Parallel Execution
 
-## Notes
-- The sequential implementation is the **main required solution**.  
-- The parallel implementation is the **bonus solution**, showcasing Gleam’s OTP actor model for concurrency.  
-- Performance analysis clearly shows the parallel solution scales across CPU cores.  
+Performance (on test machine):
+workers: 8
+
+Real time: ~0.30s
+
+CPU time: ~2.28s
+
+CPU/Real ratio: ~7.6s
+
+Insights:
+
+With 8 workers, CPU utilization approached full capacity (ratio close to 8).
+
+Confirms that the parallel implementation scales efficiently with available cores.
+
+## Maximum Problem Size Solved
+
+Largest problem successfully solved was for:
+
+N = 10,000,000 4
+
+Real time: ~ 0.4s
+
+CPU time: 3.32s
+
+CPU/ Real Ratio: ~ 7.9s
+
+Note: 
+The bonus implementation has been performed in the lukas_bonus file.
+
+
